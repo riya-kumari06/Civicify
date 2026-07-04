@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Community Feed — Civicfy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080d14; --surface: #0f1923; --surface2: #162030;
+      --border: rgba(255,255,255,0.07); --accent: #00e5a0; --accent2: #0ea5e9;
+      --accent3: #f59e0b; --text: #f0f4f8; --muted: #6b7f96;
+      --danger: #ef4444;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      background: rgba(8,13,20,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 0.9rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--surface2); }
+    .nav-icon { color: var(--muted); cursor: pointer; }
+
+    .layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; max-width: 1200px; margin: 0 auto; padding: 6rem 2rem 4rem; }
+
+    .page-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    /* FILTERS */
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem; font-weight: 600;
+      padding: 0.4rem 0.9rem; border-radius: 100px; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+    .sort-btn {
+      margin-left: auto; background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem; font-weight: 600;
+      padding: 0.4rem 0.9rem; border-radius: 100px; cursor: pointer; transition: all 0.2s;
+    }
+    .sort-btn.active { border-color: rgba(14,165,233,0.4); color: var(--accent2); }
+
+    /* ISSUE CARDS */
+    .issue-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem; transition: border-color 0.2s, transform 0.2s;
+    }
+    .issue-card:hover { border-color: rgba(0,229,160,0.2); transform: translateY(-2px); }
+    .issue-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
+    .issue-user { display: flex; align-items: center; gap: 0.6rem; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .issue-user-info .name { font-weight: 600; font-size: 0.9rem; }
+    .issue-user-info .time { font-size: 0.78rem; color: var(--muted); }
+    .badges { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+    .badge {
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.22rem 0.6rem; border-radius: 6px;
+      display: inline-flex; align-items: center; gap: 0.25rem;
+    }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--accent3); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .badge-blue { background: rgba(14,165,233,0.1); color: var(--accent2); border: 1px solid rgba(14,165,233,0.2); }
+    .badge-resolved { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .badge-inprogress { background: rgba(245,158,11,0.1); color: var(--accent3); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-pending { background: rgba(107,127,150,0.15); color: var(--muted); border: 1px solid rgba(107,127,150,0.2); }
+
+    .issue-body p { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 0.75rem; }
+    .issue-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 0.75rem; }
+    .issue-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .issue-meta span { display: flex; align-items: center; gap: 0.2rem; }
+    .issue-meta .material-icons-round { font-size: 0.9rem; }
+    .issue-actions { display: flex; align-items: center; gap: 1rem; }
+    .action-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem; font-weight: 500;
+      padding: 0.35rem 0.8rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .action-btn:hover { border-color: rgba(0,229,160,0.4); color: var(--accent); }
+    .action-btn .material-icons-round { font-size: 0.95rem; }
+    .action-btn.voted { border-color: rgba(0,229,160,0.4); color: var(--accent); }
+    .ai-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.78rem; color: var(--muted); margin-top: 0.5rem;
+    }
+    .ai-conf { color: var(--accent2); font-weight: 600; }
+
+    /* SIDEBAR */
+    .sidebar-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+    }
+    .sidebar-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+      margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .sidebar-title .material-icons-round { font-size: 1rem; color: var(--accent); }
+
+    /* HEATMAP */
+    .heatmap-wrap { position: relative; border-radius: 10px; overflow: hidden; }
+    .heatmap-canvas { width: 100%; height: 180px; background: #0a1520; border-radius: 10px; display: block; }
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem;
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .legend-grad {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: linear-gradient(90deg, #00e5a0, #f59e0b, #ef4444);
+    }
+
+    /* LEADERBOARD */
+    .leader-item { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .rank { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.9rem; width: 20px; color: var(--muted); }
+    .rank.gold { color: #f59e0b; }
+    .rank.silver { color: #94a3b8; }
+    .rank.bronze { color: #cd7c2f; }
+    .leader-name { flex: 1; font-size: 0.88rem; font-weight: 500; }
+    .leader-pts { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; color: var(--accent); }
+
+    /* CAMPAIGNS */
+    .campaign-item { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; }
+    .campaign-item h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .campaign-item .stats { font-size: 0.78rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .campaign-item p { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .enroll-btn {
+      background: var(--accent); color: #000; font-weight: 700; font-size: 0.8rem;
+      padding: 0.35rem 0.9rem; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .enroll-btn:hover { background: #00ffb3; }
+    .enroll-btn.enrolled { background: var(--surface2); color: var(--accent); border: 1px solid rgba(0,229,160,0.3); }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="index.html">Civicfy</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="communitypage.html" class="active">Community</a>
+    <a href="first.html">Profile</a>
+    <a href="gamification.html">Impact</a>
+  </div>
+  <div class="nav-icon"><span class="material-icons-round">notifications</span></div>
+</nav>
+
+<div class="layout">
+  <!-- MAIN FEED -->
+  <div>
+    <h1 class="page-title">Community Feed</h1>
+    <p class="page-sub">Browse, vote, and track civic issues reported by citizens near you.</p>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterCat(this,'All')">All Issues</button>
+      <button class="filter-btn" onclick="filterCat(this,'Road')">🛣️ Road</button>
+      <button class="filter-btn" onclick="filterCat(this,'Water')">💧 Water</button>
+      <button class="filter-btn" onclick="filterCat(this,'Garbage')">🗑️ Garbage</button>
+      <button class="filter-btn" onclick="filterCat(this,'Electricity')">⚡ Electricity</button>
+      <button class="filter-btn" onclick="filterCat(this,'Tree / Green')">🌳 Green</button>
+      <button class="sort-btn active" id="sortBtn" onclick="toggleSort()">Most Upvoted ↓</button>
+    </div>
+
+    <div id="feed"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div>
+    <!-- AI HEATMAP -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">
+        <span class="material-icons-round">map</span>
+        AI Issue Hotspot Map
+      </div>
+      <div class="heatmap-wrap">
+        <canvas class="heatmap-canvas" id="heatmap"></canvas>
+      </div>
+      <div class="heatmap-legend">
+        <span>Low</span>
+        <div class="legend-grad"></div>
+        <span>High Risk</span>
+      </div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem">Predicted hotspots based on historical issue frequency. Updated daily by AI.</p>
+    </div>
+
+    <!-- TOP CONTRIBUTORS -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">
+        <span class="material-icons-round">leaderboard</span>
+        Top Contributors
+      </div>
+      <div class="leader-item">
+        <span class="rank gold">1</span>
+        <span class="leader-name">Ravi Singh</span>
+        <span class="leader-pts">1,240 pts</span>
+      </div>
+      <div class="leader-item">
+        <span class="rank silver">2</span>
+        <span class="leader-name">Anjali Verma</span>
+        <span class="leader-pts">980 pts</span>
+      </div>
+      <div class="leader-item">
+        <span class="rank bronze">3</span>
+        <span class="leader-name">Mohit Das</span>
+        <span class="leader-pts">750 pts</span>
+      </div>
+      <div class="leader-item">
+        <span class="rank">4</span>
+        <span class="leader-name">Priya Sharma</span>
+        <span class="leader-pts">620 pts</span>
+      </div>
+      <div class="leader-item">
+        <span class="rank">5</span>
+        <span class="leader-name">Amit Kumar</span>
+        <span class="leader-pts">510 pts</span>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="sidebar-card">
+      <div class="sidebar-title">
+        <span class="material-icons-round">campaign</span>
+        Active Campaigns
+      </div>
+      <div class="campaign-item">
+        <h4>🧹 Clean City Drive</h4>
+        <div class="stats">234 volunteers · 2.3T waste cleared</div>
+        <p>Monthly cleanliness drive across all wards. Report waste issues to join automatically.</p>
+        <button class="enroll-btn" onclick="enroll(this)">Enroll</button>
+      </div>
+      <div class="campaign-item">
+        <h4>🌳 Tree Plantation</h4>
+        <div class="stats">1,200 trees planted · 87 enrolled</div>
+        <p>Be part of the green initiative. Plant trees, earn bonus Civic Points.</p>
+        <button class="enroll-btn" onclick="enroll(this)">Enroll</button>
+      </div>
+      <div class="campaign-item">
+        <h4>💧 Water Conservation</h4>
+        <div class="stats">47 hotspots fixed · 312 participants</div>
+        <p>Report water wastage and leakage. Help prevent waterlogging before monsoon.</p>
+        <button class="enroll-btn" onclick="enroll(this)">Enroll</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const issues = [
+    { id:1, user:'Amit Kumar', initials:'AK', color:'#0ea5e9', time:'2 hours ago', cat:'Road', urgency:'High 🔴', urgencyClass:'badge-red', status:'In Progress', statusClass:'badge-inprogress', text:'Potholes near Ranchi Railway Station are causing accidents daily. The road has completely deteriorated after last monsoon.', votes:24, comments:6, confidence:91, location:'Station Rd, Ranchi', img:'acatinabox-g9gr38rDrlA-unsplash.jpg' },
+    { id:2, user:'Priya Sharma', initials:'PS', color:'#00e5a0', time:'5 hours ago', cat:'Water', urgency:'High 🔴', urgencyClass:'badge-red', status:'Pending', statusClass:'badge-pending', text:'Water scarcity in Ward 12. Tankers are urgently required. Residents haven\'t had supply in 3 days.', votes:42, comments:11, confidence:88, location:'Ward 12, Ranchi', img:'ajaysinh-chauhan-YEC5gIGR-Qo-unsplash.jpg' },
+    { id:3, user:'Mohit Das', initials:'MD', color:'#f59e0b', time:'1 day ago', cat:'Garbage', urgency:'Medium 🟡', urgencyClass:'badge-yellow', status:'Resolved', statusClass:'badge-resolved', text:'Garbage overflowing near Lalpur market. Health hazard for nearby residents. Issue persists for 2 weeks.', votes:18, comments:4, confidence:93, location:'Lalpur Market, Ranchi' },
+    { id:4, user:'Sunita Rao', initials:'SR', color:'#ef4444', time:'2 days ago', cat:'Electricity', urgency:'High 🔴', urgencyClass:'badge-red', status:'In Progress', statusClass:'badge-inprogress', text:'Street lights non-functional on Doranda Main Road. Very dangerous at night for pedestrians and cyclists.', votes:31, comments:9, confidence:85, location:'Doranda, Ranchi' },
+    { id:5, user:'Rahul Gupta', initials:'RG', color:'#8b5cf6', time:'3 days ago', cat:'Tree / Green', urgency:'Low 🟢', urgencyClass:'badge-green', status:'Resolved', statusClass:'badge-resolved', text:'Tree fallen blocking footpath on Harmu Road. Senior citizens and schoolchildren cannot pass safely.', votes:15, comments:3, confidence:79, location:'Harmu Rd, Ranchi' },
+    { id:6, user:'Fatima Sheikh', initials:'FS', color:'#ec4899', time:'4 days ago', cat:'Water', urgency:'High 🔴', urgencyClass:'badge-red', status:'Pending', statusClass:'badge-pending', text:'Waterlogging at Sector 4 junction every time it rains. AI hotspot map already flagged this area.', votes:38, comments:14, confidence:90, location:'Sector 4, Ranchi' },
+  ];
+
+  let activeFilter = 'All';
+  let sortByVotes = true;
+
+  function filterCat(btn, cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = cat;
+    renderFeed();
+  }
+
+  function toggleSort() {
+    sortByVotes = !sortByVotes;
+    const btn = document.getElementById('sortBtn');
+    btn.textContent = sortByVotes ? 'Most Upvoted ↓' : 'Most Recent ↓';
+    renderFeed();
+  }
+
+  function renderFeed() {
+    let data = activeFilter === 'All' ? [...issues] : issues.filter(i => i.cat === activeFilter);
+    if (sortByVotes) data.sort((a,b) => b.votes - a.votes);
+    document.getElementById('feed').innerHTML = data.map(issue => `
+      <div class="issue-card" id="card-${issue.id}">
+        <div class="issue-header">
+          <div class="issue-user">
+            <div class="avatar" style="background:${issue.color}22;color:${issue.color}">${issue.initials}</div>
+            <div class="issue-user-info">
+              <div class="name">${issue.user}</div>
+              <div class="time">${issue.time}</div>
+            </div>
+          </div>
+          <div class="badges">
+            <span class="badge ${issue.urgencyClass}">${issue.urgency}</span>
+            <span class="badge ${issue.statusClass}">${issue.status}</span>
+            <span class="badge badge-blue">${issue.cat}</span>
+          </div>
+        </div>
+        <div class="issue-body">
+          ${issue.img ? `<img src="${issue.img}" class="issue-img" alt="Issue" onerror="this.style.display='none'"/>` : ''}
+          <p>${issue.text}</p>
+          <div class="issue-meta">
+            <span><span class="material-icons-round">location_on</span>${issue.location}</span>
+          </div>
+          <div class="ai-row">
+            🤖 AI verified · Category confidence: <span class="ai-conf">${issue.confidence}%</span>
+          </div>
+        </div>
+        <div class="issue-actions" style="margin-top:0.75rem">
+          <button class="action-btn" onclick="vote(this, ${issue.id})">
+            <span class="material-icons-round">thumb_up</span>
+            <span class="vote-count">${issue.votes}</span>
+          </button>
+          <button class="action-btn">
+            <span class="material-icons-round">comment</span>
+            ${issue.comments}
+          </button>
+          <button class="action-btn">
+            <span class="material-icons-round">share</span>
+            Share
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function vote(btn, id) {
+    if (btn.classList.contains('voted')) return;
+    btn.classList.add('voted');
+    const span = btn.querySelector('.vote-count');
+    span.textContent = parseInt(span.textContent) + 1;
+  }
+
+  function enroll(btn) {
+    if (btn.classList.contains('enrolled')) return;
+    btn.classList.add('enrolled');
+    btn.textContent = '✓ Enrolled';
+  }
+
+  renderFeed();
+
+  // Draw heatmap on canvas
+  window.addEventListener('load', () => {
+    const canvas = document.getElementById('heatmap');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+
+    ctx.fillStyle = '#0a1520';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < w; x += 24) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 24) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+    // Hotspot clusters
+    const hotspots = [
+      { x: 0.25, y: 0.35, r: 55, intensity: 0.9, color: '#ef4444' },
+      { x: 0.65, y: 0.25, r: 40, intensity: 0.75, color: '#f59e0b' },
+      { x: 0.45, y: 0.7,  r: 50, intensity: 0.85, color: '#ef4444' },
+      { x: 0.8,  y: 0.6,  r: 30, intensity: 0.55, color: '#f59e0b' },
+      { x: 0.12, y: 0.75, r: 25, intensity: 0.45, color: '#00e5a0' },
+      { x: 0.7,  y: 0.85, r: 20, intensity: 0.4,  color: '#00e5a0' },
+    ];
+
+    hotspots.forEach(h => {
+      const grd = ctx.createRadialGradient(h.x*w, h.y*canvas.offsetHeight, 0, h.x*w, h.y*canvas.offsetHeight, h.r);
+      grd.addColorStop(0, h.color + Math.round(h.intensity * 99).toString(16).padStart(2,'0'));
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(h.x*w, h.y*canvas.offsetHeight, h.r, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // Labels
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '9px DM Sans';
+    ctx.fillText('Station Rd', 0.22*w-18, 0.35*canvas.offsetHeight+4);
+    ctx.fillText('Sector 4', 0.42*w-15, 0.70*canvas.offsetHeight+4);
+    ctx.fillText('Doranda', 0.62*w-15, 0.25*canvas.offsetHeight+4);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — Civicfy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080d14; --surface: #0f1923; --surface2: #162030;
+      --border: rgba(255,255,255,0.07); --accent: #00e5a0; --accent2: #0ea5e9;
+      --accent3: #f59e0b; --text: #f0f4f8; --muted: #6b7f96;
+      --danger: #ef4444;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      background: rgba(8,13,20,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 0.9rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--surface2); }
+    .nav-icon { color: var(--muted); cursor: pointer; }
+
+    .page-wrap { max-width: 960px; margin: 0 auto; padding: 6rem 2rem 4rem; }
+
+    .profile-header {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem;
+      display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem;
+      color: #000; flex-shrink: 0;
+    }
+    .profile-info h1 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .profile-info p { color: var(--muted); font-size: 0.88rem; }
+    .profile-stats { display: flex; gap: 1.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    .pstat .num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--accent); }
+    .pstat .lbl { font-size: 0.75rem; color: var(--muted); }
+    .report-btn {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--accent); color: #000;
+      font-weight: 700; font-size: 0.9rem;
+      padding: 0.65rem 1.25rem; border-radius: 10px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+      flex-shrink: 0;
+    }
+    .report-btn:hover { background: #00ffb3; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .card-title .material-icons-round { font-size: 1rem; color: var(--accent); }
+
+    /* ISSUES LIST */
+    .issue-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.9rem 0; border-bottom: 1px solid var(--border);
+    }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-icon-wrap {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .issue-icon-wrap .material-icons-round { font-size: 1.2rem; }
+    .issue-item-info { flex: 1; }
+    .issue-item-info .title { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .issue-item-info .meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .badge {
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.2rem 0.55rem; border-radius: 6px;
+    }
+    .badge-resolved { background: rgba(0,229,160,0.1); color: var(--accent); }
+    .badge-inprogress { background: rgba(245,158,11,0.1); color: var(--accent3); }
+    .badge-pending { background: rgba(107,127,150,0.15); color: var(--muted); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--accent3); }
+    .badge-green { background: rgba(0,229,160,0.1); color: var(--accent); }
+    .votes { font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 0.25rem; }
+    .votes .material-icons-round { font-size: 0.9rem; }
+
+    /* REWARDS */
+    .points-wrap { margin-bottom: 1.25rem; }
+    .points-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+    .points-header span { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--accent); }
+    .points-header small { font-size: 0.78rem; color: var(--muted); }
+    .progress-bar { height: 8px; background: var(--surface2); border-radius: 8px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1.5s ease; }
+    .points-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* BADGES */
+    .badges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .badge-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 0.75rem; text-align: center;
+    }
+    .badge-card .emoji { font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .badge-card .badge-name { font-size: 0.75rem; font-weight: 600; }
+    .badge-card .badge-desc { font-size: 0.68rem; color: var(--muted); margin-top: 0.2rem; }
+    .badge-card.locked { opacity: 0.4; filter: grayscale(1); }
+
+    /* REWARDS LIST */
+    .reward-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+    }
+    .reward-item:last-child { border-bottom: none; }
+    .reward-icon { font-size: 1.5rem; }
+    .reward-info { flex: 1; }
+    .reward-info .name { font-size: 0.88rem; font-weight: 500; }
+    .reward-info .cost { font-size: 0.75rem; color: var(--muted); }
+    .redeem-btn {
+      background: var(--surface2); border: 1px solid rgba(0,229,160,0.3);
+      color: var(--accent); font-size: 0.78rem; font-weight: 700;
+      padding: 0.3rem 0.75rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .redeem-btn:hover { background: rgba(0,229,160,0.1); }
+    .redeem-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+      .grid2 { grid-template-columns: 1fr; }
+      .profile-header { flex-wrap: wrap; }
+      .report-btn { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="index.html">Civicfy</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="communitypage.html">Community</a>
+    <a href="first.html" class="active">Profile</a>
+    <a href="gamification.html">Impact</a>
+  </div>
+  <div class="nav-icon"><span class="material-icons-round">notifications</span></div>
+</nav>
+
+<div class="page-wrap">
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="profile-avatar">P</div>
+    <div class="profile-info">
+      <h1>Welcome, Priya! 👋</h1>
+      <p>priya.sharma@civicfy.in · Member since Jan 2025 · Ranchi, Jharkhand</p>
+      <div class="profile-stats">
+        <div class="pstat"><div class="num">4</div><div class="lbl">Reports Filed</div></div>
+        <div class="pstat"><div class="num">2</div><div class="lbl">Resolved</div></div>
+        <div class="pstat"><div class="num">750</div><div class="lbl">Civic Points</div></div>
+        <div class="pstat"><div class="num">#4</div><div class="lbl">Leaderboard</div></div>
+      </div>
+    </div>
+    <a href="report.html" class="report-btn">
+      <span class="material-icons-round" style="font-size:1rem">add_circle</span>
+      Report Issue
+    </a>
+  </div>
+
+  <div class="grid2">
+    <!-- LEFT: ISSUES -->
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <span class="material-icons-round">history</span>
+          Recent Issues
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-icon-wrap" style="background:rgba(239,68,68,0.1)">
+            <span class="material-icons-round" style="color:var(--danger)">delete</span>
+          </div>
+          <div class="issue-item-info">
+            <div class="title">Garbage Overflowing Near Market</div>
+            <div class="meta">
+              <span>Reported 2 days ago</span>
+              <span class="badge badge-inprogress">In Progress</span>
+              <span class="badge badge-red">High 🔴</span>
+            </div>
+          </div>
+          <div class="votes"><span class="material-icons-round">thumb_up</span>12</div>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-icon-wrap" style="background:rgba(14,165,233,0.1)">
+            <span class="material-icons-round" style="color:var(--accent2)">edit_road</span>
+          </div>
+          <div class="issue-item-info">
+            <div class="title">Road Crack on Main Street</div>
+            <div class="meta">
+              <span>Reported 5 days ago</span>
+              <span class="badge badge-resolved">Resolved ✓</span>
+              <span class="badge badge-yellow">Medium 🟡</span>
+            </div>
+          </div>
+          <div class="votes"><span class="material-icons-round">thumb_up</span>25</div>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-icon-wrap" style="background:rgba(14,165,233,0.1)">
+            <span class="material-icons-round" style="color:var(--accent2)">water_drop</span>
+          </div>
+          <div class="issue-item-info">
+            <div class="title">Water Tap Leak in Sector 4</div>
+            <div class="meta">
+              <span>Reported 1 week ago</span>
+              <span class="badge badge-pending">Pending</span>
+              <span class="badge badge-red">High 🔴</span>
+            </div>
+          </div>
+          <div class="votes"><span class="material-icons-round">thumb_up</span>8</div>
+        </div>
+
+        <div class="issue-item">
+          <div class="issue-icon-wrap" style="background:rgba(0,229,160,0.1)">
+            <span class="material-icons-round" style="color:var(--accent)">forest</span>
+          </div>
+          <div class="issue-item-info">
+            <div class="title">Tree Fallen Blocking Sidewalk</div>
+            <div class="meta">
+              <span>Reported 2 weeks ago</span>
+              <span class="badge badge-resolved">Resolved ✓</span>
+              <span class="badge badge-green">Low 🟢</span>
+            </div>
+          </div>
+          <div class="votes"><span class="material-icons-round">thumb_up</span>15</div>
+        </div>
+      </div>
+
+      <!-- BADGES -->
+      <div class="card">
+        <div class="card-title">
+          <span class="material-icons-round">military_tech</span>
+          Your Badges
+        </div>
+        <div class="badges-grid">
+          <div class="badge-card">
+            <div class="emoji">🌱</div>
+            <div class="badge-name">First Report</div>
+            <div class="badge-desc">Filed your first issue</div>
+          </div>
+          <div class="badge-card">
+            <div class="emoji">🔥</div>
+            <div class="badge-name">Streak: 3 Days</div>
+            <div class="badge-desc">Active for 3 days straight</div>
+          </div>
+          <div class="badge-card">
+            <div class="emoji">💧</div>
+            <div class="badge-name">Water Warrior</div>
+            <div class="badge-desc">Reported 2 water issues</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="emoji">🏆</div>
+            <div class="badge-name">Top Reporter</div>
+            <div class="badge-desc">Need 10 reports</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="emoji">⚡</div>
+            <div class="badge-name">Speed Resolver</div>
+            <div class="badge-desc">Issue resolved in 24h</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="emoji">🌳</div>
+            <div class="badge-name">Eco Champion</div>
+            <div class="badge-desc">Join 2 green campaigns</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: REWARDS -->
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <span class="material-icons-round">stars</span>
+          Civic Points
+        </div>
+        <div class="points-wrap">
+          <div class="points-header">
+            <span>750</span>
+            <small>/ 1000 to next level</small>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+          <p class="points-note">Earn points by reporting issues, voting, and joining campaigns. 250 more points to reach Level 3 — Community Leader!</p>
+        </div>
+
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.75rem">Redeem Rewards</div>
+
+        <div class="reward-item">
+          <div class="reward-icon">☕</div>
+          <div class="reward-info">
+            <div class="name">Free Coffee Voucher</div>
+            <div class="cost">200 points</div>
+          </div>
+          <button class="redeem-btn" onclick="redeem(this, 200)">Redeem</button>
+        </div>
+        <div class="reward-item">
+          <div class="reward-icon">🎬</div>
+          <div class="reward-info">
+            <div class="name">Movie Ticket Discount</div>
+            <div class="cost">400 points</div>
+          </div>
+          <button class="redeem-btn" onclick="redeem(this, 400)">Redeem</button>
+        </div>
+        <div class="reward-item">
+          <div class="reward-icon">🌱</div>
+          <div class="reward-info">
+            <div class="name">Adopt a Tree Certificate</div>
+            <div class="cost">500 points</div>
+          </div>
+          <button class="redeem-btn" onclick="redeem(this, 500)">Redeem</button>
+        </div>
+        <div class="reward-item">
+          <div class="reward-icon">🏅</div>
+          <div class="reward-info">
+            <div class="name">Civic Hero Certificate</div>
+            <div class="cost">1000 points</div>
+          </div>
+          <button class="redeem-btn" disabled>Need 250 more</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span class="material-icons-round">insights</span>
+          AI Impact Summary
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.7">
+          Based on your 4 reports, AI has estimated your contribution prevented approximately <strong style="color:var(--accent)">~0.8 tons</strong> of environmental waste and improved infrastructure quality for <strong style="color:var(--accent)">~1,200 residents</strong> in your area.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Animate progress bar
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('progressFill').style.width = '75%';
+    }, 300);
+  });
+
+  let pts = 750;
+  function redeem(btn, cost) {
+    if (pts < cost) return;
+    pts -= cost;
+    btn.textContent = '✓ Redeemed';
+    btn.disabled = true;
+    document.querySelector('.points-header span').textContent = pts;
+    document.getElementById('progressFill').style.width = (pts/1000*100) + '%';
+  }
+</script>
+</body>
+</html>
