@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Report an Issue — Civicfy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080d14; --surface: #0f1923; --surface2: #162030;
+      --border: rgba(255,255,255,0.07); --accent: #00e5a0; --accent2: #0ea5e9;
+      --accent3: #f59e0b; --text: #f0f4f8; --muted: #6b7f96;
+      --danger: #ef4444; --warn: #f59e0b; --success: #00e5a0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      background: rgba(8,13,20,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 0.9rem; border-radius: 8px; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--surface2); }
+    .nav-icon { color: var(--muted); cursor: pointer; }
+
+    .page-wrap { max-width: 740px; margin: 0 auto; padding: 6rem 2rem 4rem; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem; margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    label { display: block; font-size: 0.88rem; font-weight: 500; color: var(--muted); margin-bottom: 0.4rem; }
+    input[type="text"], textarea, select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; padding: 0.75rem 1rem;
+      border-radius: 10px; outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: rgba(0,229,160,0.4); }
+    textarea { resize: vertical; min-height: 80px; }
+    select { cursor: pointer; }
+
+    /* FILE UPLOAD */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: 14px;
+      padding: 2.5rem 1.5rem; text-align: center;
+      cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .upload-zone:hover { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.03); }
+    .upload-zone.dragover { border-color: var(--accent); background: rgba(0,229,160,0.06); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon .material-icons-round { font-size: 2.5rem; color: var(--muted); }
+    .upload-zone p { color: var(--muted); font-size: 0.88rem; margin-top: 0.5rem; }
+    .upload-zone strong { color: var(--text); }
+
+    /* AI ANALYSIS BOX */
+    .ai-box {
+      background: var(--surface2); border: 1px solid rgba(14,165,233,0.2);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      margin-top: 1.25rem; display: none;
+    }
+    .ai-box.visible { display: block; }
+    .ai-box-header {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem;
+      color: var(--accent2); margin-bottom: 1rem;
+    }
+    .ai-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(14,165,233,0.3);
+      border-top-color: var(--accent2);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ai-result { display: none; }
+    .ai-result.visible { display: block; }
+    .ai-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .ai-row-label { font-size: 0.82rem; color: var(--muted); }
+    .ai-tag {
+      font-size: 0.8rem; font-weight: 700;
+      padding: 0.25rem 0.7rem; border-radius: 8px;
+    }
+    .tag-green { background: rgba(0,229,160,0.15); color: var(--accent); }
+    .tag-red { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .tag-yellow { background: rgba(245,158,11,0.15); color: var(--warn); }
+    .tag-blue { background: rgba(14,165,233,0.15); color: var(--accent2); }
+    .confidence-bar { height: 4px; background: var(--border); border-radius: 4px; margin-top: 0.3rem; overflow: hidden; }
+    .confidence-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 1s ease; }
+    .preview-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-top: 1rem; display: none; }
+
+    /* VOICE */
+    .voice-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .voice-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .voice-btn:hover { border-color: rgba(0,229,160,0.4); color: var(--accent); }
+    .voice-btn.recording { border-color: var(--danger); color: var(--danger); animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .lang-btns { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    .lang-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.8rem;
+      padding: 0.3rem 0.7rem; border-radius: 8px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover, .lang-btn.active { border-color: rgba(0,229,160,0.4); color: var(--accent); }
+
+    /* LOCATION */
+    .location-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.75rem 1rem;
+    }
+    .location-row .material-icons-round { color: var(--accent); }
+    .location-row span { font-size: 0.9rem; color: var(--muted); flex: 1; }
+    .location-row strong { color: var(--text); }
+
+    /* CATEGORY */
+    .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 0.25rem; }
+    .cat-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem; font-weight: 500;
+      padding: 0.6rem 0.75rem; border-radius: 10px; cursor: pointer;
+      text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    }
+    .cat-btn:hover { border-color: var(--border); }
+    .cat-btn.selected { border-color: var(--accent); background: rgba(0,229,160,0.08); color: var(--accent); }
+    .cat-btn.ai-detected { border-color: var(--accent2); background: rgba(14,165,233,0.08); color: var(--accent2); }
+    .cat-icon { font-size: 1.2rem; }
+
+    /* SUBMIT */
+    .submit-btn {
+      width: 100%; background: var(--accent); color: #000;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+      padding: 1rem; border-radius: 12px; border: none; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .submit-btn:hover { background: #00ffb3; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* AI PROCESSING OVERLAY */
+    .ai-processing {
+      display: none; text-align: center; padding: 2rem;
+    }
+    .ai-processing.visible { display: block; }
+    .ai-processing .big-spinner {
+      width: 48px; height: 48px;
+      border: 3px solid rgba(0,229,160,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    .ai-processing p { color: var(--muted); font-size: 0.95rem; }
+    .ai-processing .step-text { color: var(--accent2); font-weight: 600; margin-top: 0.4rem; }
+
+    /* SUCCESS */
+    .success-card { display: none; text-align: center; padding: 2.5rem; }
+    .success-card.visible { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .success-card h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .success-card p { color: var(--muted); margin-bottom: 1.5rem; }
+    .tracking-id {
+      display: inline-block;
+      background: var(--surface2); border: 1px solid rgba(0,229,160,0.3);
+      color: var(--accent); font-family: monospace; font-size: 1.1rem;
+      padding: 0.5rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;
+    }
+    .urgency-summary {
+      background: var(--surface2); border-radius: 12px; padding: 1rem 1.5rem;
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .urgency-summary .us-item { text-align: center; }
+    .urgency-summary .us-label { font-size: 0.75rem; color: var(--muted); }
+    .urgency-summary .us-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--accent); color: #000; font-weight: 700; font-size: 0.9rem;
+      padding: 0.65rem 1.5rem; border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif; margin: 0.25rem;
+    }
+    .btn-primary:hover { background: #00ffb3; }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--surface2); color: var(--text); font-weight: 600; font-size: 0.9rem;
+      padding: 0.65rem 1.5rem; border-radius: 10px; text-decoration: none; border: 1px solid var(--border); cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif; margin: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Civicfy</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="communitypage.html">Community</a>
+    <a href="first.html">Profile</a>
+    <a href="gamification.html">Impact</a>
+  </div>
+  <div class="nav-icon"><span class="material-icons-round">notifications</span></div>
+</nav>
+
+<div class="page-wrap">
+  <h1 class="page-title">Report a New Issue</h1>
+  <p class="page-sub">Help us improve our community. Our AI will automatically verify, categorize, and route your complaint.</p>
+
+  <div id="reportForm">
+    <!-- MEDIA UPLOAD -->
+    <div class="card">
+      <div class="card-title">
+        <span class="material-icons-round" style="color:var(--accent);font-size:1rem">upload_file</span>
+        Upload Media
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*,video/*" />
+        <div class="upload-icon"><span class="material-icons-round">cloud_upload</span></div>
+        <p><strong>Click to upload</strong> or drag and drop</p>
+        <p>PNG, JPG, MP4 up to 10MB</p>
+      </div>
+      <img id="previewImg" class="preview-img" alt="Preview"/>
+
+      <!-- AI ANALYSIS -->
+      <div class="ai-box" id="aiBox">
+        <div class="ai-box-header">
+          <div class="ai-spinner" id="aiSpinner"></div>
+          <span id="aiStatusText">🤖 AI is analysing your image…</span>
+        </div>
+        <div class="ai-result" id="aiResult">
+          <div class="ai-row">
+            <span class="ai-row-label">Detected Category</span>
+            <span class="ai-tag tag-blue" id="aiCategory">—</span>
+          </div>
+          <div class="ai-row" style="margin-bottom:0.25rem">
+            <span class="ai-row-label">Confidence</span>
+            <span class="ai-tag tag-green" id="aiConfidence">—</span>
+          </div>
+          <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill" style="width:0%"></div></div>
+          <div class="ai-row" style="margin-top:0.75rem">
+            <span class="ai-row-label">AI Urgency Score</span>
+            <span class="ai-tag" id="urgencyTag">—</span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-row-label">Duplicate Check</span>
+            <span class="ai-tag tag-green" id="dupTag">✓ No duplicate found</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOICE -->
+    <div class="card">
+      <div class="card-title">
+        <span class="material-icons-round" style="color:var(--accent);font-size:1rem">mic</span>
+        Voice Report
+      </div>
+      <div class="voice-btns">
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
+          <span class="material-icons-round" style="font-size:1rem">mic</span>
+          Start Recording (English)
+        </button>
+      </div>
+      <div class="lang-btns">
+        <button class="lang-btn active" onclick="setLang(this,'en-IN')">English</button>
+        <button class="lang-btn" onclick="setLang(this,'hi-IN')">Hindi</button>
+        <button class="lang-btn" onclick="setLang(this,'bn-IN')">Bengali</button>
+        <button class="lang-btn" onclick="setLang(this,'sa-IN')">Santhali</button>
+      </div>
+      <p id="voiceTranscript" style="margin-top:0.75rem;font-size:0.88rem;color:var(--muted);min-height:1.4rem;font-style:italic"></p>
+    </div>
+
+    <!-- LOCATION -->
+    <div class="card">
+      <div class="card-title">
+        <span class="material-icons-round" style="color:var(--accent);font-size:1rem">location_on</span>
+        Location
+      </div>
+      <div class="location-row">
+        <span class="material-icons-round">my_location</span>
+        <span id="locationText">Detecting your location…</span>
+      </div>
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="card">
+      <div class="card-title">
+        <span class="material-icons-round" style="color:var(--accent);font-size:1rem">label</span>
+        Category <span style="color:var(--accent2);font-size:0.75rem;font-weight:500;text-transform:none;letter-spacing:0">&nbsp;(AI-classified)</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem">Upload an image and AI will auto-select the category. You can also choose manually.</p>
+      <div class="category-grid" id="catGrid">
+        <button class="cat-btn" onclick="selectCat(this,'Garbage')"><span class="cat-icon">🗑️</span>Garbage</button>
+        <button class="cat-btn" onclick="selectCat(this,'Water')"><span class="cat-icon">💧</span>Water</button>
+        <button class="cat-btn" onclick="selectCat(this,'Road')"><span class="cat-icon">🛣️</span>Road</button>
+        <button class="cat-btn" onclick="selectCat(this,'Electricity')"><span class="cat-icon">⚡</span>Electricity</button>
+        <button class="cat-btn" onclick="selectCat(this,'Tree / Green')"><span class="cat-icon">🌳</span>Tree / Green</button>
+        <button class="cat-btn" onclick="selectCat(this,'Pollution')"><span class="cat-icon">🌫️</span>Pollution</button>
+      </div>
+    </div>
+
+    <!-- TITLE & DESCRIPTION -->
+    <div class="card">
+      <div class="card-title">
+        <span class="material-icons-round" style="color:var(--accent);font-size:1rem">edit</span>
+        Issue Details
+      </div>
+      <div style="margin-bottom:1rem">
+        <label>Issue Title *</label>
+        <input type="text" id="issueTitle" placeholder="e.g. Pothole on MG Road near Bus Stop 4"/>
+      </div>
+      <div>
+        <label>Description (Optional)</label>
+        <textarea id="issueDesc" placeholder="Describe the issue in detail…"></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitIssue()">
+      <span class="material-icons-round">send</span>
+      Submit Issue
+    </button>
+  </div>
+
+  <!-- AI PROCESSING SCREEN -->
+  <div class="card ai-processing" id="processingScreen">
+    <div class="big-spinner"></div>
+    <p>Submitting your report…</p>
+    <p class="step-text" id="processingStep">🤖 Running AI verification…</p>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="card success-card" id="successScreen">
+    <div class="success-icon">✅</div>
+    <h2>Issue Submitted Successfully!</h2>
+    <p>Your report has been verified by AI and forwarded to the relevant authority.</p>
+    <div class="tracking-id" id="trackingId">—</div>
+    <div class="urgency-summary" id="urgencySummary"></div>
+    <div>
+      <a href="first.html" class="btn-primary">
+        <span class="material-icons-round" style="font-size:1rem">person</span>
+        Track in Profile
+      </a>
+      <a href="communitypage.html" class="btn-secondary">View Community Feed</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // AI classification data
+  const aiData = {
+    Garbage:     { urgency: 'High 🔴',    urgencyClass: 'tag-red',    confidence: 91 },
+    Water:       { urgency: 'High 🔴',    urgencyClass: 'tag-red',    confidence: 87 },
+    Road:        { urgency: 'Medium 🟡',  urgencyClass: 'tag-yellow', confidence: 84 },
+    Electricity: { urgency: 'High 🔴',    urgencyClass: 'tag-red',    confidence: 89 },
+    'Tree / Green': { urgency: 'Low 🟢',  urgencyClass: 'tag-green',  confidence: 78 },
+    Pollution:   { urgency: 'Medium 🟡',  urgencyClass: 'tag-yellow', confidence: 82 },
+  };
+  const cats = Object.keys(aiData);
+  let selectedCategory = null;
+  let currentLang = 'en-IN';
+  let recognition = null;
+  let isRecording = false;
+
+  // Detect location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById('locationText').innerHTML = `<strong>📍 Detected:</strong> Lat ${pos.coords.latitude.toFixed(4)}, Lng ${pos.coords.longitude.toFixed(4)}`;
+    }, () => {
+      document.getElementById('locationText').innerHTML = `<strong>📍</strong> Ranchi, Jharkhand (default)`;
+    });
+  }
+
+  // File upload & AI simulation
+  const fileInput = document.getElementById('fileInput');
+  const uploadZone = document.getElementById('uploadZone');
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+  function processFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('previewImg');
+      img.src = e.target.result; img.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    const aiBox = document.getElementById('aiBox');
+    const aiResult = document.getElementById('aiResult');
+    const aiSpinner = document.getElementById('aiSpinner');
+    const aiStatusText = document.getElementById('aiStatusText');
+
+    aiBox.classList.add('visible');
+    aiResult.classList.remove('visible');
+    aiSpinner.style.display = 'block';
+    aiStatusText.textContent = '🤖 AI is analysing your image…';
+
+    // Simulate AI steps
+    const steps = ['Preprocessing image…', 'Running Computer Vision model…', 'Checking for duplicates…', 'Scoring urgency…', 'Analysis complete ✓'];
+    let i = 0;
+    const stepTimer = setInterval(() => {
+      if (i < steps.length) { aiStatusText.textContent = '🤖 ' + steps[i]; i++; }
+      else {
+        clearInterval(stepTimer);
+        const detectedCat = cats[Math.floor(Math.random() * cats.length)];
+        const data = aiData[detectedCat];
+
+        aiSpinner.style.display = 'none';
+        aiStatusText.textContent = '✅ AI Analysis Complete';
+        aiResult.classList.add('visible');
+
+        document.getElementById('aiCategory').textContent = detectedCat;
+        document.getElementById('aiConfidence').textContent = data.confidence + '%';
+        document.getElementById('confidenceFill').style.width = data.confidence + '%';
+        const urgTag = document.getElementById('urgencyTag');
+        urgTag.textContent = data.urgency;
+        urgTag.className = 'ai-tag ' + data.urgencyClass;
+
+        // Auto-select category
+        document.querySelectorAll('.cat-btn').forEach(b => {
+          b.classList.remove('selected', 'ai-detected');
+          if (b.textContent.trim().includes(detectedCat)) {
+            b.classList.add('ai-detected');
+            selectedCategory = detectedCat;
+          }
+        });
+      }
+    }, 500);
+  }
+
+  function selectCat(btn, cat) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected', 'ai-detected'));
+    btn.classList.add('selected');
+    selectedCategory = cat;
+  }
+
+  function setLang(btn, lang) {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = lang;
+  }
+
+  function toggleVoice() {
+    const btn = document.getElementById('voiceBtn');
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      document.getElementById('voiceTranscript').textContent = 'Voice input not supported in this browser. Try Chrome.';
+      return;
+    }
+    if (isRecording) {
+      recognition && recognition.stop();
+      isRecording = false;
+      btn.classList.remove('recording');
+      btn.innerHTML = '<span class="material-icons-round" style="font-size:1rem">mic</span> Start Recording (English)';
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = currentLang;
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.onresult = e => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('');
+      document.getElementById('voiceTranscript').textContent = t;
+      if (e.results[0].isFinal && !document.getElementById('issueTitle').value) {
+        document.getElementById('issueTitle').value = t;
+      }
+    };
+    recognition.onend = () => {
+      isRecording = false;
+      btn.classList.remove('recording');
+      btn.innerHTML = '<span class="material-icons-round" style="font-size:1rem">mic</span> Start Recording';
+    };
+    recognition.start();
+    isRecording = true;
+    btn.classList.add('recording');
+    btn.innerHTML = '<span class="material-icons-round" style="font-size:1rem">stop</span> Recording…';
+  }
+
+  function generateTrackingId() {
+    const prefix = ['CIV','JHK','RNC','MUM','DEL'][Math.floor(Math.random()*5)];
+    const num = Math.floor(10000000 + Math.random() * 90000000);
+    return `${prefix}-${num}`;
+  }
+
+  function submitIssue() {
+    const title = document.getElementById('issueTitle').value.trim();
+    if (!title) { document.getElementById('issueTitle').focus(); return; }
+
+    document.getElementById('reportForm').style.display = 'none';
+    const proc = document.getElementById('processingScreen');
+    proc.classList.add('visible');
+
+    const steps2 = ['🤖 Running AI verification…', '🔗 Writing to blockchain…', '📡 Routing to authority…', '✅ Done!'];
+    let i = 0;
+    const t = setInterval(() => {
+      document.getElementById('processingStep').textContent = steps2[i];
+      i++;
+      if (i >= steps2.length) {
+        clearInterval(t);
+        setTimeout(() => {
+          proc.classList.remove('visible');
+          const detectedCat = selectedCategory || cats[Math.floor(Math.random()*cats.length)];
+          const data = aiData[detectedCat] || aiData['Road'];
+          document.getElementById('trackingId').textContent = generateTrackingId();
+          document.getElementById('urgencySummary').innerHTML = `
+            <div class="us-item"><div class="us-label">Category</div><div class="us-val">${detectedCat}</div></div>
+            <div class="us-item"><div class="us-label">Urgency</div><div class="us-val">${data.urgency}</div></div>
+            <div class="us-item"><div class="us-label">AI Confidence</div><div class="us-val">${data.confidence}%</div></div>
+            <div class="us-item"><div class="us-label">Status</div><div class="us-val" style="color:var(--accent)">Forwarded ✓</div></div>
+          `;
+          document.getElementById('successScreen').classList.add('visible');
+        }, 500);
+      }
+    }, 800);
+  }
+</script>
+</body>
+</html>
