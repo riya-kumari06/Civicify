@@ -1,38 +1,34 @@
-# Civicfy — Report Civic Issues. Build a Better India.
+# Civicfy — Crowdsourced Civic Issue Reporting and Resolution System
 
 🔗 **Live Demo:** https://riya-kumari06.github.io/Civicify/
 
-Civicfy is an AI-powered civic issue reporting platform built to make it easier for citizens to report problems like potholes, waterlogging, and garbage buildup — and get them resolved faster instead of stuck in bureaucratic limbo. It uses AI to detect, categorize, and prioritize issues, then routes them directly to the right authority or NGO.
+Civicfy is a frontend prototype built for **Smart India Hackathon (SIH)**, addressing the problem statement on crowdsourced civic issue reporting, proposed by the **Government of Jharkhand, Department of Higher and Technical Education**, under the theme **Clean & Green Technology**. The project got selected into the internal hackathon round.
 
-This project was built for **Smart India Hackathon (SIH)** and got selected into the **internal hackathon round**.
+## Problem Statement
 
-## The Problem
+Local governments struggle to promptly identify, prioritize, and resolve everyday civic issues like potholes, broken streetlights, and overflowing trash bins. Citizens face these problems daily, but the lack of an effective reporting and tracking system limits how quickly municipalities can respond.
 
-Most civic complaints today are scattered, unverified, and slow to reach the right department. Genuine issues get buried under duplicates, and citizens have no way to track progress or feel like their voice actually matters.
+## What This Project Demonstrates
 
-## Our Solution
+Civicfy is a UI concept/prototype showing how such a platform could work — a simple, mobile-first interface where citizens could report civic issues.
 
-Civicfy bridges that gap using AI at every step of the reporting pipeline:
+This version is a static frontend built to visualize the idea and user flow, not a fully functional production system.
 
-- **AI Detection & Categorization** – Computer Vision classifies uploaded photos/videos, while NLP auto-tags the issue category, removing the need for manual triage.
-- **ML Urgency Scoring** – Every report gets a priority score (High/Medium/Low) so critical issues get resolved first.
-- **AI Hotspot Heatmap** – Predictive mapping flags recurring problem zones so authorities can act before issues escalate.
-- **Blockchain Transparency** – Complaints are stored as immutable, publicly verifiable records.
-- **Multilingual Voice Support** – Citizens can report issues via voice in Hindi, Bengali, Santhali, or English.
-- **Gamification** – Citizens earn Civic Points for reporting, voting, and participating, encouraging consistent civic engagement.
+## Envisioned Features (Problem Statement Scope)
 
-## How It Works
+The complete solution, as outlined in the problem statement, would include:
 
-1. **Upload** – Submit an issue with photos or videos.
-2. **AI Verifies** – Computer Vision validates the issue, flags duplicates, and assigns an urgency score.
-3. **Auto-Forward** – NLP-based routing sends it to the correct department automatically.
-4. **Resolve** – Authorities close the loop, and the citizen is notified and rewarded.
+- Real-time issue reporting with photo, auto location tagging, and voice/text description
+- A live interactive map dashboard showing reported issues city-wide
+- Priority tagging based on report volume and urgency
+- Admin dashboard for municipal staff to filter, categorize, and assign issues
+- Automated routing of reports to the correct department (sanitation, public works, etc.)
+- Status tracking and notifications for citizens (confirmed → acknowledged → resolved)
+- Analytics on reporting trends and department response times
 
-## Impact
+## Current Scope
 
-- 2.3T of waste reported & cleared this quarter
-- 47 AI-predicted waterlogging hotspots fixed before monsoon
-- 1,200+ trees planted through Civicfy green campaigns across 8 wards
+This build focuses on the frontend interface and core idea presentation for the hackathon round — the backend, database, real-time map, and automated routing engine described above are part of the future roadmap, not yet implemented.
 
 ## Team
 
@@ -40,4 +36,4 @@ Built by **Team Ecolytes** for Smart India Hackathon (SIH).
 
 ---
 
-*Civicfy — because every civic issue deserves to be seen, verified, and solved.*
+*Civicfy — a step toward faster, transparent civic issue resolution.*
